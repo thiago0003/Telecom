@@ -1,0 +1,6 @@
+/home/martins/Documents/telecom-p1/build/CMakeFiles/Modem.dir
+/home/martins/Documents/telecom-p1/build/CMakeFiles/edit_cache.dir
+/home/martins/Documents/telecom-p1/build/CMakeFiles/rebuild_cache.dir
+/home/martins/Documents/telecom-p1/build/grader/CMakeFiles/test.dir
+/home/martins/Documents/telecom-p1/build/grader/CMakeFiles/edit_cache.dir
+/home/martins/Documents/telecom-p1/build/grader/CMakeFiles/rebuild_cache.dir

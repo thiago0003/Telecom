@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG -rdynamic CMakeFiles/test.dir/test.cpp.o CMakeFiles/test.dir/channel.cpp.o CMakeFiles/test.dir/__/uart.cpp.o CMakeFiles/test.dir/__/v21.cpp.o -o test  -lgtest -lgmock -lgtest_main 
