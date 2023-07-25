@@ -11,16 +11,11 @@ void UART_RX::put_samples(const unsigned int* buffer, unsigned int n)
         RECEIVING_BYTE          // Estado 3: receptor está recebendo os bits de dados do byte
     } state = State::IDLE;
 
-    static unsigned int bit_counter = 0;
-    static unsigned int bit_counter_noisy_tolerance = 0;
-    static uint8_t received_byte = 0;
-
-    CircularBuffer ring_buffer(SAMPLES_PER_SYMBOL);
-
     for (unsigned int i = 0; i < n; i++)
     {
+        int mod = i % (SAMPLES_PER_SYMBOL + 1);
         unsigned int sample = buffer[i];
-        ring_buffer.push_back(sample);
+        ring_buffer[mod] = sample;
 
         switch (state)
         {
@@ -39,35 +34,19 @@ void UART_RX::put_samples(const unsigned int* buffer, unsigned int n)
         // e a próxima amostra depois das últimas 30 amostras também for 0, o receptor considera que encontrou
         // o start bit e muda para o estado RECEIVING_BYTE. E se isso não acontecer, muda para o estado IDLE de novo
         case State::SEARCHING_START_BIT:
+            bit_counter++;
+
             if (sample == 0) {
-                bit_counter++;
-                if ((bit_counter == 30) && (buffer[i] == 0)) {
+                if (bit_counter >= 30) {
                     state = State::RECEIVING_BYTE;
                     received_byte = 0;
                     bit_counter = 0;
                     bit_counter_noisy_tolerance = 0;
 
-                    int probabily_noisy_start_bit = 0;
-                    int bit_num = 0;
+                    
 
-                    do
-                    {
-                        bit_num++;
-                        if (ring_buffer[ring_buffer.size() - 1] == 1) {
-                            probabily_noisy_start_bit++;
-                        } else {
-                            probabily_noisy_start_bit = 0;
-                        }
-
-                        if (probabily_noisy_start_bit > 5) {
-                            i = i - (bit_num - probabily_noisy_start_bit);
-                            break;
-                        }
-                        ring_buffer.pop_back();
-                    } while (ring_buffer.size() != 0);
                 }
             } else {
-                bit_counter++;
                 bit_counter_noisy_tolerance++;
 
                 // Se amostra ultrapassar do limite de tolerância não será reconhecido start bit

@@ -12,7 +12,9 @@ public:
     void demodulate(const float *in_analog_samples, unsigned int n);
 private:
     float omega_mark, omega_space;
+    float v0i_prev, v0r_prev, v1i_prev, v1r_prev, filtered_decision_prev, filtered_decision_prev_prev, decision_prev, decision_prev_prev;
     std::function<void(const unsigned int *, unsigned int)> get_digital_samples;
+    float ring_buffer[SAMPLES_PER_SYMBOL + 1] = {};
 };
 
 class V21_TX
