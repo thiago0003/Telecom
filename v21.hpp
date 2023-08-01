@@ -3,6 +3,7 @@
 
 #include <functional>
 #include "config.hpp"
+//#include <math.h>
 
 class V21_RX
 {
@@ -11,14 +12,20 @@ public:
         :omega_mark(omega_mark),omega_space(omega_space),get_digital_samples(get_digital_samples) {};
     void demodulate(const float *in_analog_samples, unsigned int n);
 private:
-    float omega_mark, omega_space;
-    float v0i_prev, v0r_prev, v1i_prev, v1r_prev;
-    float decision_prev, decision_prev_prev;
-    float filtered_decision_prev, filtered_decision_prev_prev;
+    float v0i_prev = 0.; 
+    float v0r_prev = 0.;
+    float v1i_prev = 0.; 
+    float v1r_prev = 0.;
+    float decision_prev = 0.;
+    float decision_prev_prev = 0.;
+    float filtered_decision_prev = 0.; 
+    float filtered_decision_prev_prev = 0.;
     std::function<void(const unsigned int *, unsigned int)> get_digital_samples;
-    float ring_buffer[SAMPLES_PER_SYMBOL] = {};
-    unsigned int ring_buffer_it = 0;
-    unsigned int counter = 0;
+    float ring_buffer[SAMPLES_PER_SYMBOL +1] = {};
+    int ring_buffer_it = 0;
+    int counter = 0;
+
+    float omega_mark, omega_space;
 };
 
 class V21_TX
