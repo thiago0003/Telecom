@@ -3,6 +3,9 @@
 
 void UART_RX::put_samples(const unsigned int* buffer, unsigned int n)
 {
+    int bit_num = 0;
+    FILE *dc = fopen("../dc.raw", "wb");
+
     // Usar uma máquina de estados para receber os dados UART, percorrendo cada amostra
     // buffer e lidando com cada estado
     static enum class State {
@@ -40,11 +43,26 @@ void UART_RX::put_samples(const unsigned int* buffer, unsigned int n)
                 if (bit_counter >= 30) {
                     state = State::RECEIVING_BYTE;
                     received_byte = 0;
-                    bit_counter = 0;
                     bit_counter_noisy_tolerance = 0;
 
-                    
+                    for(int j = (mod - (bit_counter % SAMPLES_PER_SYMBOL)); j != (mod -1); j = (j + 1) % SAMPLES_PER_SYMBOL)
+                    {
+                        bit_num++;
+                        if (ring_buffer[j] == 1) {
+                            bit_counter_noisy_tolerance++;
+                        } else {
+                            bit_counter_noisy_tolerance = 0;
+                        }
 
+
+                        if (bit_counter_noisy_tolerance > 10) {
+                            i = i - (bit_num - bit_counter_noisy_tolerance);
+                            break;
+                        }
+                    }
+                    
+                    bit_counter_noisy_tolerance = 0;
+                    //bit_counter = 0;
                 }
             } else {
                 bit_counter_noisy_tolerance++;
@@ -62,6 +80,9 @@ void UART_RX::put_samples(const unsigned int* buffer, unsigned int n)
         // função get_byte passando o byte recebido
         case State::RECEIVING_BYTE:
             bit_counter++;
+
+            fwrite(&bit_counter, 1, sizeof(float), dc);
+
             if ((bit_counter % SAMPLES_PER_SYMBOL - (SAMPLES_PER_SYMBOL / 2)) == 0) { // Garantir que receptor meça no meio do bit
                 received_byte |= (sample << (bit_counter / SAMPLES_PER_SYMBOL - 1));
 
@@ -73,6 +94,8 @@ void UART_RX::put_samples(const unsigned int* buffer, unsigned int n)
             break;
         }
     }
+
+    fclose(dc);
 }
 
 void UART_TX::put_byte(uint8_t byte)
